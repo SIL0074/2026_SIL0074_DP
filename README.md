@@ -24,6 +24,8 @@ Cílem práce bylo zkonstruovat systém schopný dlouhodobého bateriového chod
 
 Bc. Pavel Šiller (2026)
 
+**Disclaimer:** Tento projekt byl vytvořen primárně pro účely vysokoškolské diplomové práce. Zdrojové kódy a hardwarové návrhy jsou poskytovány „tak jak jsou“ bez záruky vhodnosti pro produkční využití nebo průmyslové nasazení. Autor nenese odpovědnost za případné škody způsobené jejich použitím. Uvedená řešení mohou sloužit jako vzdělávací demonstrace a inspirace pro vývoj IoT systémů.
+
 ---
 
 # ESP-NOW mesh network 🇬🇧 🇺🇸
@@ -51,3 +53,5 @@ The system is engineered for autonomous, long-term battery operation. This is ac
 ## Author
 
 Bc. Pavel Siller (2026)
+
+**Disclaimer:** This project was created primarily for the purposes of a university master's thesis. Source codes and hardware designs are provided "as is" without warranty of fitness for production use or industrial deployment. The author takes no responsibility for any damages caused by their use. The provided solutions serve as educational demonstrations and inspiration for developing IoT systems.
