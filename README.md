@@ -12,7 +12,7 @@ Cílem práce bylo zkonstruovat systém schopný dlouhodobého bateriového chod
 - `Shared`: Složka se sdíleným komunikačním protokolem a knihovnami.
 - `Laborka`: Sada zdrojů pro úlohu do výuky (konfigurace odesílatel, příjemce a sdílený router).
 - `RPi_web_etc`: Konfigurační soubory a skripty pro nadřazený aplikační/webový server běžící na Raspberry Pi (např. logování).
-- `3D`: Obsahuje 3D modely tisknutých krabiček.
+- `3D`: Obsahuje 3D modely tisknutých krabiček ve formátu `.stl`
 
 ## Použitý hardware
 
@@ -23,3 +23,31 @@ Cílem práce bylo zkonstruovat systém schopný dlouhodobého bateriového chod
 ## Autor
 
 Bc. Pavel Šiller (2026)
+
+---
+
+# ESP-NOW mesh network
+
+This repository contains the source code for a master's thesis focused on the design and implementation of a low-power, hierarchical wireless mesh network using the ESP-NOW protocol.
+
+The system is engineered for autonomous, long-term battery operation. This is achieved by synchronizing deep sleep modes, reducing wakeup multi-node packet collision through time dispersion, and employing a software-based EMA (Exponential Moving Average) compensation for hardware RC oscillator drift.
+
+## Repository Structure
+
+- `Sensor_FW`: End sensor node firmware (ESP32-C3). Reads environmental data via a BME688 I2C sensor, transmits it over ESP-NOW, and returns to deep sleep.
+- `Router_FW`: Router node firmware (ESP32-WROOM-32D/U). Acts as the network's backbone, asynchronously capturing uplink data and forwarding it to the gateway layer.
+- `Gateway_FW` & `Receiver_FW`: A dual-MCU gateway architecture connected via UART. `Receiver_FW` handles low-level ESP-NOW reception, while `Gateway_FW` manages the TCP/IP uplink (via Wi-Fi or a T-SIM7000G NB-IoT modem) translating data to MQTT.
+- `Shared`: Common communication protocol structures and C libraries.
+- `Laborka`: Educational resources and mini-projects intended for university laboratory classes.
+- `RPi_web_etc`: Server configuration scripts (Grafana, Node-RED, etc.) for a Raspberry Pi host.
+- `3D`: 3D printable `.stl` models for the custom hardware enclosures.
+
+## Used hardware
+
+- ESP32-C3-SIL0074-S, ESP32-WROOM-32D/U, LilyGO T-SIM7000G
+- Sensor Bosch BME688
+- LDO and add. HW: RT9080-33, Buck-Boost TPS63020, etc.
+
+## Author
+
+Bc. Pavel Siller (2026)
