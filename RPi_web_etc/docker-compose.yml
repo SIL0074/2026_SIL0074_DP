@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./influxdb:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=YOUR_PASSWORD
+      - DOCKER_INFLUXDB_INIT_ORG=my-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=YOUR_TOKEN
+    restart: always
+
+  telegraf:
+    image: telegraf
+    container_name: telegraf
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./telegraf/decode_bme688.star:/etc/telegraf/decode_bme688.star:ro
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUX_TOKEN=YOUR_TOKEN
+    restart: always
+
+  web:
+    image: nginx
+    container_name: web
+    ports:
+      - "80:80"
+    volumes:
+      - ./web:/usr/share/nginx/html
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: always
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    restart: always
+
+  charging-detector:
+    image: python:3.9-slim
+    container_name: charging-detector
+    volumes:
+      - ./charging_detector.py:/app/charging_detector.py
+    working_dir: /app
+    command: sh -c "pip install paho-mqtt && python charging_detector.py"
+    depends_on:
+      - mosquitto
+    restart: always

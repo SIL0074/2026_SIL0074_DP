@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="cs" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ESP-NOW Monitor</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+</head>
+<body>
+
+  <div class="topo-tooltip" id="topoTip">
+    <div class="topo-tooltip-arrow"></div>
+    <span id="topoTipText"></span>
+  </div>
+
+  <div class="toast-container bottom-right" id="toastContainer"></div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="App.closeSidebar()"></div>
+
+  
+  <header class="header">
+
+    <div class="brand">
+      <button class="mob-menu-btn" id="mobMenuBtn" onclick="App.toggleSidebar()" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="brand-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <path d="M8 1L14 4.5V11.5L8 15L2 11.5V4.5L8 1Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="8" cy="8" r="2" fill="white"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">ESP-NOW Monitor</div>
+        <div class="brand-sub">SIL0074</div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="header-clock" id="liveClock">—</div>
+      <div class="header-vdivider"></div>
+      <div id="netUptime" class="header-uptime">Síť běží: —</div>
+      <div id="bridgeWarn" class="bridge-warn" style="display:none;">Sériové spojení přerušeno</div>
+    </div>
+
+    <div class="header-right">
+      <div class="header-stats">
+        <div class="hstat" onclick="App.navAndClose(()=>App.showNetworkOverview())" style="cursor:pointer;" title="Zobrazit přehled sítě">
+          <div class="hstat-val" id="hdrNodes">0</div>
+          <div class="hstat-lbl" data-i18n="hdr_nodes">Uzlů</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" id="hdrRate">0</div>
+          <div class="hstat-lbl">ZPR/MIN</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" id="hdrTotal">0</div>
+          <div class="hstat-lbl" data-i18n="hdr_total">Celkem</div>
+        </div>
+        <div class="hstat" title="Počet zpráv od půlnoci">
+          <div class="hstat-val" id="hdrTodayCount">0</div>
+          <div class="hstat-lbl">Dnes</div>
+        </div>
+      </div>
+
+      <button class="icon-btn" id="themeToggle" onclick="App.toggleTheme()" title="Přepnout téma">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" id="themeIcon">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+
+  </header>
+
+  
+  <div class="app">
+
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-user">
+        <div class="user-pill" id="userPill">
+          <div class="user-pill-left">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span id="roleLabel" class="user-pill-role">Administrátor</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-scroll">
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-header">
+            <div class="sg-title">Brána</div>
+          </div>
+          <div id="gwList"></div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-header">
+            <div class="sg-title" data-i18n="general">Všeobecné</div>
+          </div>
+          <div class="node-item" id="netItem" onclick="App.navAndClose(()=>App.showNetworkOverview())">
+            <div class="node-icon ni-env">NET</div>
+            <div class="node-body">
+              <div class="node-name" data-i18n="all_nodes">Všechny uzly</div>
+              <div class="node-sub" id="netSub">— uzlů</div>
+            </div>
+          </div>
+          <div class="node-item admin-only" id="sysItem" onclick="App.navAndClose(()=>App.showSystemView())" style="display:none;">
+            <div class="node-icon ni-other">SYS</div>
+            <div class="node-body">
+              <div class="node-name" data-i18n="system">Systém & Logy</div>
+              <div class="node-sub" data-i18n="diagnostics">Diagnostika</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-header">
+            <div class="sg-title" data-i18n="sensors">Senzory</div>
+            <div class="sg-badge" id="sensCnt">0</div>
+          </div>
+          <div id="sensList"></div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-header">
+            <div class="sg-title" data-i18n="routers">Směrovače</div>
+            <div class="sg-badge" id="routCnt">0</div>
+          </div>
+          <div id="routList"></div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div id="visitsBox" style="display:none; flex-direction:column; padding:0 14px 14px;">
+          <div class="sg-title" style="margin-bottom:8px;" data-i18n="visit_history">Historie návštěv</div>
+          <div id="visitsList" style="font-family:var(--mono);font-size:0.62rem;display:grid;gap:4px;max-height:140px;overflow-y:auto;background:var(--surface2);border-radius:8px;padding:8px;border:1px solid var(--border);line-height:1.4;"></div>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-header" style="opacity:0.6;">
+            <div class="sg-title" data-i18n="archive">Archiv (Neaktivní)</div>
+            <div class="sg-badge" id="archCnt" style="background:var(--border2);color:var(--muted);">0</div>
+          </div>
+          <div id="archList" style="opacity:0.7;"></div>
+        </div>
+
+      </div>
+    </aside>
+
+    <main class="panel" id="panel">
+      <div class="welcome">
+        <div class="welcome-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L20 6.5V17.5L12 22L4 17.5V6.5L12 2Z" stroke="#9ca3af" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3" fill="#9ca3af" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="welcome-title" data-i18n="select_node">Vyberte uzel ze sidebaru</div>
+        <div class="welcome-sub" data-i18n="connect_mqtt">nebo se nejdříve připojte k MQTT brokeru</div>
+      </div>
+    </main>
+
+  </div>
+
+  
+  <div class="modal-overlay" id="nodeModal" onclick="App.closeNodeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div id="modalTitle" style="font-weight:600;font-size:1.1rem;color:var(--hi);font-family:var(--mono);">Node ID</div>
+        <button class="close-btn" onclick="App.hideNodeModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer">
+        <button id="modalFullBtn" class="btn-full">
+          <span data-i18n="full_detail">Plný detail</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="chartModal" onclick="App.hideChartModal()">
+    <div class="modal-content wide" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div id="chartModalTitle" style="font-weight:600;font-size:1.1rem;color:var(--hi);" data-i18n="chart_detail">Graf detail</div>
+        <div id="largeChartBtns" class="chart-btns" style="margin:0 20px;"></div>
+        <button class="close-btn" onclick="App.hideChartModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="full-chart-container">
+        <canvas id="largeChartCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="renameModal" onclick="App.hideRenameModal()">
+    <div class="modal-content" style="max-width:360px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="font-weight:700;font-size:1.05rem;color:var(--hi);">Přejmenovat uzel</div>
+        <button class="close-btn" onclick="App.hideRenameModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="display:grid;gap:12px;">
+        <div id="renameIdLabel" style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); margin-bottom:-5px;">NODE_ID</div>
+        
+        <div>
+          <label style="font-size:0.65rem; font-weight:700; color:var(--faint); text-transform:uppercase; display:block; margin-bottom:4px;">Název uzlu</label>
+          <input type="text" id="renameInput" class="modal-input" placeholder="Např. Obývák"
+            onkeyup="if(event.key==='Enter') App.submitRename()">
+        </div>
+
+        <div>
+          <label style="font-size:0.65rem; font-weight:700; color:var(--faint); text-transform:uppercase; display:block; margin-bottom:4px;">Skupina</label>
+          <input type="text" id="renameGroupInput" class="modal-input" placeholder="Např. Přízemí"
+            onkeyup="if(event.key==='Enter') App.submitRename()">
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:5px;">
+          <button onclick="App.submitRename()" class="btn-full" style="flex:2; justify-content:center;">Uložit</button>
+          <button onclick="App.resetRename()" class="btn-full" style="flex:1; background:var(--surface2); color:var(--text); border:1px solid var(--border); justify-content:center;" title="Resetovat na původní ID">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+
+</body>
+</html>
