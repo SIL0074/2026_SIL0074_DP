@@ -39,7 +39,7 @@ The system is engineered for autonomous, long-term battery operation. This is ac
 - `Gateway_FW` & `Receiver_FW`: A dual-MCU gateway architecture connected via UART. `Receiver_FW` handles low-level ESP-NOW reception, while `Gateway_FW` manages the TCP/IP uplink (via Wi-Fi or a T-SIM7000G NB-IoT modem) translating data to MQTT.
 - `Shared`: Common communication protocol structures and C libraries.
 - `Laborka`: Educational resources and mini-projects intended for university laboratory classes.
-- `RPi_web_etc`: Server configuration scripts (Grafana, Node-RED, etc.) for a Raspberry Pi host.
+- `RPi_web_etc`: Server configuration scripts for a Raspberry Pi host.
 - `3D`: 3D printable `.stl` models for the custom hardware enclosures.
 
 ## Used hardware
