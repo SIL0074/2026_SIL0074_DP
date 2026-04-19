@@ -1,4 +1,4 @@
-# ESP-NOW mesh síť
+# ESP-NOW mesh síť 🇨🇿 🇸🇰
 
 Tento repozitář obsahuje zdrojové kódy k diplomové práci, která se zabývá návrhem a realizací nízkoenergetické, hierarchické bezdrátové mesh sítě pomocí protokolu ESP-NOW.
 
@@ -26,7 +26,7 @@ Bc. Pavel Šiller (2026)
 
 ---
 
-# ESP-NOW mesh network
+# ESP-NOW mesh network 🇬🇧 🇺🇸
 
 This repository contains the source code for a master's thesis focused on the design and implementation of a low-power, hierarchical wireless mesh network using the ESP-NOW protocol.
 
