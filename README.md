@@ -24,7 +24,7 @@ Cílem práce bylo zkonstruovat systém schopný dlouhodobého bateriového chod
 
 Bc. Pavel Šiller (2026)
 
-**Disclaimer:** Tento projekt byl vytvořen primárně pro účely vysokoškolské diplomové práce. Zdrojové kódy a hardwarové návrhy jsou poskytovány „tak jak jsou“ bez záruky vhodnosti pro produkční využití nebo průmyslové nasazení. Autor nenese odpovědnost za případné škody způsobené jejich použitím. Uvedená řešení mohou sloužit jako vzdělávací demonstrace a inspirace pro vývoj IoT systémů.
+**Usnesení:** Tento projekt byl vytvořen primárně pro účely vysokoškolské diplomové práce. Zdrojové kódy a hardwarové návrhy jsou poskytovány „tak jak jsou“ bez záruky vhodnosti pro produkční využití nebo průmyslové nasazení. Autor nenese odpovědnost za případné škody způsobené jejich použitím. Uvedená řešení mohou sloužit jako vzdělávací demonstrace a inspirace pro vývoj IoT systémů.
 
 ---
 
